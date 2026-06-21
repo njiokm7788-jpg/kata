@@ -1,38 +1,35 @@
-name: Katabump Auto Renew# Runs at 00:00
+name: Katabump Auto Renew
 
 on:
   schedule:
-    # 每天 UTC 0点 (北京时间 8点) 运行
+    # 每天北京时间 8:00 运行
     - cron: '0 0 * * *'  
-
-  workflow_dispatch: # 允许手动触发
-
+  workflow_dispatch: # 允许点击 Actions 页面上的按钮手动触发，方便调试
 
 jobs:
   renew:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+        # cache: 'npm' # 如果你有 package-lock.json，开启缓存会更快
         
     - name: Install Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y xvfb
-        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --batch --no-tty --dearmor -o /usr/share/keyrings/google-chrome.gpg
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
         npm install
+        # 下面这一行会安装运行 Chrome 所需的所有系统依赖（非常稳定）
         npx playwright install-deps chrome
+        # 安装 chrome 浏览器本身（如果项目依赖于特定版本的 playwright 浏览器）
+        npx playwright install chrome
       
     - name: Run Renew Script
       env:
-        # 将 USERS_JSON 配置在 GitHub Repository Secrets 中
-        # 格式: [{"username": "xxx", "password": "xxx"}, ...]
+        # 确保你在 GitHub Repo -> Settings -> Secrets and variables -> Actions 中设置了 USERS_JSON
         USERS_JSON: ${{ secrets.USERS_JSON }}
+      run: node index.js  # <--- ！！！请确保这里指向你的实际脚本文件名
