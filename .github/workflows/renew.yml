@@ -32,4 +32,4 @@ jobs:
       env:
         # 确保你在 GitHub Repo -> Settings -> Secrets and variables -> Actions 中设置了 USERS_JSON
         USERS_JSON: ${{ secrets.USERS_JSON }}
-      run: node index.js  # <--- ！！！请确保这里指向你的实际脚本文件名
+      run: node renew.js  # <--- ！！！请确保这里指向你的实际脚本文件名
